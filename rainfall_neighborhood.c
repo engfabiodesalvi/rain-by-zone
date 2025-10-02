@@ -65,8 +65,12 @@ struct Menu {
     char *returnNovoCaracteres;
     // Indice para determinar o dia durante entrada de dados de intensidade da chuva
     int indiceDia;
-    // novo valor com máximo de 5 dígitos
-    char novoValor[5];
+    // novo valor com máximo de 5 dígitos - o útimo caracter é o '\n'
+    char novoValor[6];
+    // numero de valores inseridos na variavel novoValor
+    int returnNovoValor;
+    // nova Intensidade da chuva
+    int novaIntensidadeChuva;
 };
 
 // Protótipo das funções
@@ -78,8 +82,10 @@ void menuRegistrarIntensidadeChuva(struct Menu *menu, struct ConjuntoDados *conj
 void menuFim();
 void defineCoresHeatmap(struct CoresHeatmap *coresHeatmap);
 void inicializaMatriz(int medidaChuvaDiaBairro[15][10], struct Limites *limites);
+void defineLimites(int medidaChuvaDiaBairro[15][10], struct Limites *limites);
 void imprimirHeatmap(char bairros[10][20], int medidaChuvaDiaBairro[15][10], struct Limites *limites, struct CoresHeatmap *coresHeatmap);
 void mensagemEncerramento();
+int validaOpcaoMenu(struct Menu *menu);
 int validaEntradaNumerica(struct Menu *menu);
 int validaEntradaCaracters(struct Menu *menu);
 
@@ -182,7 +188,7 @@ int main() {
                 // Limpando o buffer de entrada!!!!
                 while(getchar() != '\n');
 
-            } while (!validaEntradaNumerica(&menu));
+            } while (!validaOpcaoMenu(&menu));
 
             // Analisa a opção selecionada
             if (menu.opcao >= 1 && menu.opcao <= 2) {
@@ -220,7 +226,7 @@ int main() {
                 while(getchar() != '\n');
 
             // Valida a entrada numerica antes de prosseguir
-            } while (!validaEntradaNumerica(&menu));                
+            } while (!validaOpcaoMenu(&menu));                
 
             // Verifica qual opção de conjunto de dados foi escolhida
             if (menu.opcao >= 1 && menu.opcao <= 2) {
@@ -235,7 +241,7 @@ int main() {
                     menu.menu = 0;
             }            
         } else if (menu.menu >= 11 && menu.menu <= 12) {
-            // Visualizar dados aleatórios ou visualizar dados inseridos pelo susuário
+            // Visualizar dados aleatórios ou visualizar dados inseridos pelo usuário
 
             // Menu 11 e 12 para as opções 1 e 2
 
@@ -269,7 +275,7 @@ int main() {
                 while(getchar() != '\n');
 
             // Valida a entrada numerica antes de prosseguir
-            } while (!validaEntradaNumerica(&menu));                
+            } while (!validaOpcaoMenu(&menu));                
 
             // Verifica qual opção de conjunto de dados foi escolhida
             if (menu.opcao == 1) {
@@ -301,13 +307,13 @@ int main() {
 
                 // Opções do menu
                 menu.opcaoMinMax[0] = 1;
-                menu.opcaoMinMax[1] = MAX_BAIRROS;
+                menu.opcaoMinMax[1] = MAX_BAIRROS + 1;
 
                 // Limpando o buffer de entrada!!!!
                 while(getchar() != '\n');
 
             // Valida a entrada numerica antes de prosseguir
-            } while (!validaEntradaNumerica(&menu));                
+            } while (!validaOpcaoMenu(&menu));                
 
             // Verifica qual opção de conjunto de dados foi escolhida
             if (menu.opcao >= 1 && menu.opcao <= MAX_BAIRROS) {
@@ -332,23 +338,37 @@ int main() {
             // "Serviços disponíveis" -> "2 - Registrar a intensidade da chuva"
             // "Selecione um bairro para inserir os dados:" -> "1 - Bairro 1" ao "10 - Bairro 10"                
 
-            do {
-                // Menu "Editar nome do bairro"  
+            // Menu "Editar nome do bairro"  
 
-                menuInicio();
-                menuRegistrarIntensidadeChuva(&menu, & conjuntoDados);
-                printf("Digite um novo nome do bairro ou tecle \"Enter\": ");
-                // Nome do bairro digitado
-                // A função fgets foi utilizada para obter strings com espaços.
-                menu.returnNovoCaracteres = fgets(menu.novoBairro, 20, stdin);
-                menuFim();
+            menuInicio();
+            menuRegistrarIntensidadeChuva(&menu, & conjuntoDados);
+            printf("Digite um novo nome do bairro ou tecle \"Enter\": ");
 
-                // Eliminando '\n' da string
-                menu.novoBairro[strcspn(menu.novoBairro, "\n")] = 0;
+            // Nome do bairro digitado
+            // A função fgets foi utilizada para obter strings com espaços.
+            //menu.returnNovoCaracteres = fgets(menu.novoBairro, 20, stdin);
 
+            // Verifica se fgets() leu todos os caracteres da entrada
+            // Se retornar NULL significa que ainda restam caracteres a serem lidos
+            if (fgets(menu.novoBairro, 20, stdin) != NULL) {            
+                // Verifica se o carater de fim de linha foi lido
+                //  retorno NULL da função strchr() significa que o caracter não esta presente no vetor
+                if (strchr(menu.novoBairro, '\n') == NULL ) {
+                    // Termina de ler os caracters não lidos!
+                    // Um valor igual a EOF significa que o fim do buffer foi alcançado.
+                    char c;
+                    while ((c = getchar()) != '\n' && c != EOF);
+                }
+            }
 
-            } while (!validaEntradaCaracters(&menu));   
+            menuFim();
 
+            // Eliminando '\n' da string
+            menu.novoBairro[strcspn(menu.novoBairro, "\n")] = 0;
+            
+            // Verifica se a entrada de caracteres é válida  
+
+            // Verifica se foi digitado o nome de um novo bairro
             if (strlen(menu.novoBairro) > 0) {
                 // Renomeia o bairro
                 strcpy(conjuntoDados.bairros[menu.bairro-1], menu.novoBairro);
@@ -357,15 +377,17 @@ int main() {
                 printf(" [Novo nome do bairro: %s]\n", conjuntoDados.bairros[menu.bairro - 1]);                
             }
             // Ir para o menu para inserir os dados de intensidade da chuva
-            // Iniciar pelo primeiro dia
-             menu.menu = menu.menu * 100 + 1;                           
+            // Inicia a captura de dados pelo dia 1
+            menu.indiceDia = 1;
+            menu.menu = menu.menu * 100 + menu.indiceDia;                          
 
-        } else if (menu.menu >= 20101 && menu.menu <= 21015) {
+        } else if (menu.menu >= 20101 && menu.menu <= 21016) {
             // Menu para inserir as informações de intensidade de chuva medidas em mm/h
-            // Menus 201.01 a 210.15
+            // Menus 201.01 a 210.16
             // Opções 1 a 15
 
-            // Menu para as opções 1 a 15
+            // Menu para os dias 1 a 15
+            // Menu para a opção 16 -> menu com a opção voltar
             // Passos para chegar a este menu:
             // "Serviços disponíveis" -> "2 - Registrar a intensidade da chuva"
             // "Selecione um bairro para inserir os dados:" -> "1 - Bairro 1" ao "10 - Bairro 10"         
@@ -376,29 +398,67 @@ int main() {
 
                 menuInicio();
                 menuRegistrarIntensidadeChuva(&menu, & conjuntoDados);
-                printf("Digite um valor em [mm/h] ou tecle \"Enter\" : ");
-                // Nome do bairro digitado
-                // A função fgets foi utilizada para obter strings com espaços.
-                menu.returnNovoCaracteres = fgets(menu.novoValor, 5, stdin);
+
+                if (menu.indiceDia <= MAX_DIAS) {
+                    printf("Digite um novo valor em [mm/h] ou tecle \"Enter\" : ");
+                    
+                    // A função fgets foi utilizada para obter strings com espaços.   
+
+                    // Verifica se fgets() leu todos os caracteres da entrada
+                    // Se retornar NULL significa que ainda restam caracteres a serem lidos
+                    if (fgets(menu.novoValor, 5, stdin) != NULL) {            
+                        // Verifica se o carater de fim de linha foi lido
+                        //  retorno NULL da função strchr() significa que o caracter não esta presente no vetor
+                        if (strchr(menu.novoValor, '\n') == NULL ) {
+                            // Termina de ler os caracters não lidos!
+                            // Um valor igual a EOF significa que o fim do buffer foi alcançado.
+                            char c;
+                            while ((c = getchar()) != '\n' && c != EOF);
+                        }
+                    }
+            
+                } else {
+                    // Opção selecionada pelo usuario
+                    printf("Entre com a opção: ");                
+                    menu.returnOpcao = scanf("%d", &menu.opcao);
+
+                    // Opções do menu
+                    menu.opcaoMinMax[0] = 1;
+                    menu.opcaoMinMax[1] = 1;                    
+                }
+
                 menuFim();
 
-                // Eliminando '\n' da string
-                menu.novoBairro[strcspn(menu.novoBairro, "\n")] = 0;
+            // Valida a opcao do menu apenas se os valores de intensidade de chuva de todos os dias tiverem sido atualizados
+            } while (!validaOpcaoMenu(&menu) && (menu.indiceDia > MAX_DIAS));  
 
+            // if (menu.indiceDia <= MAX_DIAS) {
 
-            } while (!validaEntradaCaracters(&menu));   
+            // }
 
-            if (strlen(menu.novoBairro) > 0) {
-                // Renomeia o bairro
-                strcpy(conjuntoDados.bairros[menu.bairro-1], menu.novoBairro);
-                // Imprime uma mensagem confirmando os dados modificados
-                printf("\n -> Bairro renomeado!\n");
-                printf(" [Novo nome do bairro: %s]\n", conjuntoDados.bairros[menu.bairro - 1]);                
-            }
-            // Ir para o menu para inserir os dados de intensidade da chuva
-            // Iniciar pelo primeiro dia
-             menu.menu = menu.menu * 100 + 1;                    
+            // Verifica o indice do dia
+            if (menu.indiceDia >= 1 && menu.indiceDia <= MAX_DIAS) {
+                // Define como valor padrão o valor atual
+                menu.novaIntensidadeChuva = conjuntoDados.medidaChuvaDiaBairro[menu.indiceDia-1][menu.bairro - 1];
 
+                // Extrai o valor de intensidade da chuva da variável novoValor
+                // e armazena na variável novaIntensidadeChuva
+                menu.returnNovoValor = sscanf(
+                    menu.novoValor,
+                    "%d", &menu.novaIntensidadeChuva
+                );  
+
+                if (menu.returnNovoValor)
+                    conjuntoDados.medidaChuvaDiaBairro[menu.indiceDia-1][menu.bairro - 1] = menu.novaIntensidadeChuva;
+                
+                // Aponta para o menu do próximo dia
+                menu.indiceDia++;                
+                menu.menu = (menu.bairro + 200) * 100 + menu.indiceDia; 
+            } else {
+                // Opcao voltar
+                // Menu de seleção de bairros
+                menu.menu = 2;
+            }                                     
         } else {
             // Menu principal
             menu.menu = 0;
@@ -510,22 +570,33 @@ void menuRegistrarIntensidadeChuva(struct Menu *menu, struct ConjuntoDados *conj
         // Imprime o bairro selecinado
         printf(">> Bairro selecionado: %s\n", conjuntoDados->bairros[menu->bairro-1]);  
 
-    }else if(menu->menu >= 20101 && menu->menu <= 21015) {
+    }else if(menu->menu >= 20101 && menu->menu <= 21016) {
 
         // Menu 20101 a 21015 - Menu 
         printf("================== Registrar a intensidade da chuva ================\n\n");
         // Imprime o bairro selecinado
-        printf(">> Bairro selecionado: %s\n", conjuntoDados->bairros[menu->bairro-1]);  
+        printf(">> Bairro selecionado: %s\n", conjuntoDados->bairros[menu->bairro-1]); 
+        printf(">> Registros de intensidade da chuva:\n") ;
         // Imprime os dados de intensidade da chuva
-        printf(">> %5s- ", "Dia");
+        printf("  %-5s", "Dia");
         for(int i = 0; i < MAX_DIAS; i++)
             printf("| %3d |", i + 1);
         printf("\n");
-        printf(">> %5s- ", "mm/h");
+        printf("  %-5s", "mm/h");
         for(int i = 0; i < MAX_DIAS; i++)
-            printf("| %3d |", conjuntoDados->medidaChuvaDiaBairro[i]);
-        printf("\n");
-        printf(">> Dia selecionado %d de %d: %d [mm/h]\n");
+            printf("|%5d|", conjuntoDados->medidaChuvaDiaBairro[i][menu->bairro-1]);
+        printf("\n\n");
+        // Verifica se  indiceDia é menor que o numero total de dias
+        if (menu->indiceDia <= MAX_DIAS) {
+            printf(">> Dia: %d de %d.\n>> Intensidade da chuva: %d [mm/h]\n",
+                menu->indiceDia,
+                MAX_DIAS,
+                conjuntoDados->medidaChuvaDiaBairro[menu->indiceDia - 1][menu->bairro-1]
+            );
+        } else {
+            printf(">> Selecione uma opção:\n");
+            printf("1 - Voltar\n");
+        }
 
     } else {
 
@@ -610,6 +681,34 @@ void inicializaMatriz(int medidaChuvaDiaBairro[15][10], struct Limites *limites)
     //printf("}\n");
 }
 
+void defineLimites(int medidaChuvaDiaBairro[15][10], struct Limites *limites) {
+    // Inicia matriz com valores randomicos
+    srand(time(NULL));
+
+    // Define a variável que receberá os valores aleatórios dentro do laço de repetição
+    int medidaIntensidadeChuva;
+
+    // Define o valor máximo com um valor mínimo
+    limites->valorMax = 0;
+    // Define o valor mínimo com um valór máximo
+    limites->valorMin = INT_MAX;
+
+    //printf("{\n");
+    for (int j = 0; j < MAX_BAIRROS; j++) {    
+        //printf("{ ");
+        for (int i = 0; i < MAX_DIAS; i++){
+            medidaIntensidadeChuva = medidaChuvaDiaBairro[i][j];
+            if (medidaIntensidadeChuva > limites->valorMax)
+                limites->valorMax = medidaIntensidadeChuva;   
+            if (medidaIntensidadeChuva < limites->valorMin)
+                limites->valorMin = medidaIntensidadeChuva;                                            
+            //printf("%3d%s ", medidaChuvaDiaBairro[i][j], (i == MAX_DIAS - 1) ? "" : ",");
+        }
+        //printf("}%s\n", (j == MAX_BAIRROS - 1) ? "" : ",");    
+    }
+    //printf("}\n");
+}
+
 void imprimirHeatmap(char bairros[10][20], int medidaChuvaDiaBairro[15][10], struct Limites *limites, struct CoresHeatmap *coresHeatmap) {
     
     // Cor final do Heatmap
@@ -622,6 +721,9 @@ void imprimirHeatmap(char bairros[10][20], int medidaChuvaDiaBairro[15][10], str
     float norm_val_lower;
     // Limite superior normalizado
     float norm_val_upper;    
+
+    // Determina os limites dos valores de intensidade de chuva
+    defineLimites(medidaChuvaDiaBairro, limites);
 
     // Imprime os valores do gráfico Heatmap
     // Laço que percorre os bairros
@@ -757,13 +859,13 @@ void imprimirHeatmap(char bairros[10][20], int medidaChuvaDiaBairro[15][10], str
 
 }
 
-int validaEntradaNumerica(struct Menu *menu) {
+int validaOpcaoMenu(struct Menu *menu) {
     // Verifica se apenas um valor inteiro foi digitado
     if (menu->returnOpcao != 1) {
         printf("\nValor inválido!\n");
         return 0; // Entrada inválida
     }
-
+    
     // Verifica se a opção digitada esta disponível no menu
     if (menu->opcao < menu->opcaoMinMax[0] || menu->opcao > menu->opcaoMinMax[1]) {
         printf("\nOpção inválida!\n");
@@ -773,6 +875,20 @@ int validaEntradaNumerica(struct Menu *menu) {
     return 1; // Entrada numérica Ok    
 }
 
+int validaEntradaNumerica(struct Menu *menu) {
+    // Verifica se apenas um valor inteiro foi digitado
+    if (menu->returnNovoValor != 1) {     
+        if (menu->menu >= 20101 && menu->menu <= 21015) {
+            printf("\nUtilizar valor padrão!\n");
+            return 2; // Utilizar Valor Padão
+        } else {
+            printf("\nValor inválido!\n");
+            return 0; // Entrada inválida
+        }
+    }                
+
+    return 1; // Entrada numérica Ok    
+}
 
 int validaEntradaCaracters(struct Menu *menu) {
  
@@ -781,9 +897,6 @@ int validaEntradaCaracters(struct Menu *menu) {
         printf("\nEntrada inválida!\n");
         return 0; // Entrada inválida
     }             
-
-    // Verifica se a entrada de caracteres pode ser convertida em um número
-    
 
     return 1; // Entrada caracteres Ok    
 
