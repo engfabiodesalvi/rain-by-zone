@@ -37,9 +37,9 @@ struct ConjuntoDados {
     // Matriz nome dos bairros padrão
     char bairrosPadrao[10][20];    
     // Matriz dados de intensidade de chuva por dia e bairro
-    int medidaChuvaDiaBairro[15][10];
+    int medidaPluviometricaDiaBairro[15][10];
     // Matriz dados aleatórios de intensidade de chuva por dia e bairro
-    int medidaChuvaDiaBairroAleatorio[15][10];
+    int medidaPluviometricaDiaBairroAleatorio[15][10];
 };
 
 // Define estrutura com as opções de manipulacao do menu
@@ -63,27 +63,27 @@ struct Menu {
     // Array para armazenar o retorno da função fgets() 
     // [Erro -> NULL | Success -> aponta para a variável utilizada como buffer]    
     char *returnNovoCaracteres;
-    // Indice para determinar o dia durante entrada de dados de intensidade da chuva
+    // Indice para determinar o dia durante entrada de dados de intensidade pluviométrica
     int indiceDia;
     // novo valor com máximo de 5 dígitos - o útimo caracter é o '\n'
     char novoValor[6];
     // numero de valores inseridos na variavel novoValor
     int returnNovoValor;
-    // nova Intensidade da chuva
-    int novaIntensidadeChuva;
+    // nova Intensidade pluviométrica
+    int novaIntensidadePluviometrica;
 };
 
 // Protótipo das funções
 void apresentacaoSistema();
 void menuInicio();
 void menuPrincipal();
-void menuVisualizarIntensidadeChuva(struct Menu *menu, struct ConjuntoDados *conjuntoDados);
-void menuRegistrarIntensidadeChuva(struct Menu *menu, struct ConjuntoDados *conjuntoDados);
+void menuVisualizarIntensidadePluviometrica(struct Menu *menu, struct ConjuntoDados *conjuntoDados);
+void menuRegistrarIntensidadePluviometrica(struct Menu *menu, struct ConjuntoDados *conjuntoDados);
 void menuFim();
 void defineCoresHeatmap(struct CoresHeatmap *coresHeatmap);
-void inicializaMatriz(int medidaChuvaDiaBairro[15][10], struct Limites *limites);
-void defineLimites(int medidaChuvaDiaBairro[15][10], struct Limites *limites);
-void imprimirHeatmap(char bairros[10][20], int medidaChuvaDiaBairro[15][10], struct Limites *limites, struct CoresHeatmap *coresHeatmap);
+void inicializaMatriz(int medidaPluviometricaDiaBairro[15][10], struct Limites *limites);
+void defineLimites(int medidaPluviometricaDiaBairro[15][10], struct Limites *limites);
+void imprimirHeatmap(char bairros[10][20], int medidaPluviometricaDiaBairro[15][10], struct Limites *limites, struct CoresHeatmap *coresHeatmap);
 void mensagemEncerramento();
 int validaOpcaoMenu(struct Menu *menu);
 int validaEntradaNumerica(struct Menu *menu);
@@ -126,13 +126,13 @@ int main() {
 
 
     // Matriz dias e bairros
-    // Matriz medidaChuvaBairro aleatoria
+    // Matriz medidaPluviometricaBairro aleatoria
     // Definindo valores nulos
     // i - dias / j - bairros
     for (int i; i < MAX_DIAS; i++) {
         for (int j; j < MAX_BAIRROS; j++){
-            conjuntoDados.medidaChuvaDiaBairro[i][j] = 0;
-            conjuntoDados.medidaChuvaDiaBairroAleatorio[i][j] = 0;
+            conjuntoDados.medidaPluviometricaDiaBairro[i][j] = 0;
+            conjuntoDados.medidaPluviometricaDiaBairroAleatorio[i][j] = 0;
         }
     }
 
@@ -146,8 +146,8 @@ int main() {
 
     // Matriz nome dos bairros
     char bairros[10][20] = {
-        "Bairro  1", "Bairro  2", "Bairro  3", "Bairro  4", "Bairro  5",
-        "Bairro  6", "Bairro  7", "Bairro  8", "Bairro  9", "Bairro 10"
+        "Bairro/Região  1", "Bairro/Região  2", "Bairro/Região  3", "Bairro/Região  4", "Bairro/Região  5",
+        "Bairro/Região  6", "Bairro/Região  7", "Bairro/Região  8", "Bairro/Região  9", "Bairro/Região 10"
     };
     // Definindo os nome iniciais para os bairros
     for (int i; i < MAX_BAIRROS; i++) {        
@@ -211,7 +211,7 @@ int main() {
                 // O usuário deve escolher entre visualizar os dados leatórios ou visualizar dados registrados pelo usuário
                 menuInicio();
                 menu.tipoDado = 0;
-                menuVisualizarIntensidadeChuva(&menu, &conjuntoDados);
+                menuVisualizarIntensidadePluviometrica(&menu, &conjuntoDados);
 
                 // Opcao selecionada pelo usuario
                 printf("Entre com a opção: ");                
@@ -260,7 +260,7 @@ int main() {
 
                 // O usuário deve escolher entre visualizar os dados leatórios ou visualizar dados registrados pelo usuário
                 menuInicio();
-                menuVisualizarIntensidadeChuva(&menu, &conjuntoDados);
+                menuVisualizarIntensidadePluviometrica(&menu, &conjuntoDados);
 
                 // Opcao selecionada pelo usuario
                 printf("Entre com a opção: ");                
@@ -289,16 +289,16 @@ int main() {
 
             // Menu para a opção 2
             // Passos para chegar a este menu:
-            // "Serviços disponíveis" -> "2 - Registrar a intensidade da chuva"
+            // "Serviços disponíveis" -> "2 - Registrar a intensidade pluviométrica"
             // "Selecione um bairro para inserir os dados:" -> "1 - Bairro 1" ao "10 - Bairro 10"
 
             // Loop que garante uma entrada numérica válida
             do {                                
-                // Menu "Registrar a intensidade da chuva"
-                // O usuário deve escolher um bairro para adicinar os dados de intensidade da chuva
+                // Menu "Registrar a intensidade pluviométrica"
+                // O usuário deve escolher um bairro para adicinar os dados de intensidade pluviométrica
                 menuInicio();
                 menu.bairro = 0;
-                menuRegistrarIntensidadeChuva(&menu, &conjuntoDados);
+                menuRegistrarIntensidadePluviometrica(&menu, &conjuntoDados);
 
                 // Opção selecionada pelo usuario
                 printf("Entre com a opção: ");                
@@ -319,7 +319,7 @@ int main() {
             if (menu.opcao >= 1 && menu.opcao <= MAX_BAIRROS) {
                     // Bairro 1 - [1] / Bairro MAX_BAIRROS - [MAX_BAIRROS]
                     menu.bairro = menu.opcao;
-                    // Primeiro dígito (2) - "Registrar a intensidade da chuva"
+                    // Primeiro dígito (2) - "Registrar a intensidade pluviométrica"
                     // Segundo dígito (opcao) - Número do bairro selecionado
                     menu.menu = menu.opcao + 200;
             } else {
@@ -335,14 +335,14 @@ int main() {
 
             // Menu para as opções 1 a 10
             // Passos para chegar a este menu:
-            // "Serviços disponíveis" -> "2 - Registrar a intensidade da chuva"
+            // "Serviços disponíveis" -> "2 - Registrar a intensidade pluviométrica"
             // "Selecione um bairro para inserir os dados:" -> "1 - Bairro 1" ao "10 - Bairro 10"                
 
             // Menu "Editar nome do bairro"  
 
             menuInicio();
-            menuRegistrarIntensidadeChuva(&menu, & conjuntoDados);
-            printf("Digite um novo nome do bairro ou tecle \"Enter\": ");
+            menuRegistrarIntensidadePluviometrica(&menu, & conjuntoDados);
+            printf("Digite um novo nome para o bairro/região ou tecle \"Enter\": ");
 
             // Nome do bairro digitado
             // A função fgets foi utilizada para obter strings com espaços.
@@ -373,10 +373,10 @@ int main() {
                 // Renomeia o bairro
                 strcpy(conjuntoDados.bairros[menu.bairro-1], menu.novoBairro);
                 // Imprime uma mensagem confirmando os dados modificados
-                printf("\n -> Bairro renomeado!\n");
-                printf(" [Novo nome do bairro: %s]\n", conjuntoDados.bairros[menu.bairro - 1]);                
+                printf("\n -> Bairro/região renomeado(a)!\n");
+                printf(" [Novo nome para o bairro/região: %s]\n", conjuntoDados.bairros[menu.bairro - 1]);                
             }
-            // Ir para o menu para inserir os dados de intensidade da chuva
+            // Ir para o menu para inserir os dados de intensidade pluviométrica
             // Inicia a captura de dados pelo dia 1
             menu.indiceDia = 1;
             menu.menu = menu.menu * 100 + menu.indiceDia;                          
@@ -389,15 +389,15 @@ int main() {
             // Menu para os dias 1 a 15
             // Menu para a opção 16 -> menu com a opção voltar
             // Passos para chegar a este menu:
-            // "Serviços disponíveis" -> "2 - Registrar a intensidade da chuva"
+            // "Serviços disponíveis" -> "2 - Registrar a intensidade pluviométrica"
             // "Selecione um bairro para inserir os dados:" -> "1 - Bairro 1" ao "10 - Bairro 10"         
             // "Inserir dados diários de intensidade de chuva" -> "Dia 1" a "Dia 15"      
             
             do {
-                // Menu "Inserir dados de intensidade da chuva"  
+                // Menu "Inserir dados de intensidade pluviometrica"  
 
                 menuInicio();
-                menuRegistrarIntensidadeChuva(&menu, & conjuntoDados);
+                menuRegistrarIntensidadePluviometrica(&menu, & conjuntoDados);
 
                 if (menu.indiceDia <= MAX_DIAS) {
                     printf("Digite um novo valor em [mm/h] ou tecle \"Enter\" : ");
@@ -439,17 +439,17 @@ int main() {
             // Verifica o indice do dia
             if (menu.indiceDia >= 1 && menu.indiceDia <= MAX_DIAS) {
                 // Define como valor padrão o valor atual
-                menu.novaIntensidadeChuva = conjuntoDados.medidaChuvaDiaBairro[menu.indiceDia-1][menu.bairro - 1];
+                menu.novaIntensidadePluviometrica = conjuntoDados.medidaPluviometricaDiaBairro[menu.indiceDia-1][menu.bairro - 1];
 
-                // Extrai o valor de intensidade da chuva da variável novoValor
-                // e armazena na variável novaIntensidadeChuva
+                // Extrai o valor de intensidade pluviometrica da variável novoValor
+                // e armazena na variável novaIntensidadePluviometrica
                 menu.returnNovoValor = sscanf(
                     menu.novoValor,
-                    "%d", &menu.novaIntensidadeChuva
+                    "%d", &menu.novaIntensidadePluviometrica
                 );  
 
                 if (menu.returnNovoValor)
-                    conjuntoDados.medidaChuvaDiaBairro[menu.indiceDia-1][menu.bairro - 1] = menu.novaIntensidadeChuva;
+                    conjuntoDados.medidaPluviometricaDiaBairro[menu.indiceDia-1][menu.bairro - 1] = menu.novaIntensidadePluviometrica;
                 
                 // Aponta para o menu do próximo dia
                 menu.indiceDia++;                
@@ -476,18 +476,22 @@ void apresentacaoSistema() {
     // Apresnetação do sistema
     printf("\n");
     printf("####################################################################\n");
-    printf("######## Sistema de Registro da Intensidade de Chuva  v1.0 #########\n");
+    printf("###### Sistema de Registro de Intensidade Pluviométrica v1.0 #######\n");
     printf("####################################################################\n");
-    printf("Sobre:\n");
-    printf("Desenvolvido por Fabio Toledo Bonemer De Salvi\n");
+    printf("* Sobre:\n");
+    printf("-> Desenvolvido por Fabio Toledo Bonemer De Salvi\n");
     printf("\n");
-    printf("* Visualize os registros da intensidade de chuva de uma cidade!\n");
-    printf("-> Os registros são apresentados no formato bairros vs dias!\n");
-    printf("-> As intensidade de chuva são apresentadadas por meio de um gráfico\n   de intensidade de cores no estilo \"Heatmap\"!\n");
-    printf("-> A escala de cores inicia no azul, passa pelo laranja e termina no\n   vermelho!");
+    printf("* Visualize os registros de intensidade pluviométrica!\n");
+    printf("-> Os registros são apresentados em um gráfico comparando os\n");
+    printf("  bairros, ou regiões, ao longo dos dias!\n");
+    printf("-> As intensidade pluviométricas são apresentadadas por meio de um\n");
+    printf("  gráfico de intensidade de cores no estilo \"Heatmap\"!\n");
+    printf("-> Os menores valores são representados pela cor azul, os valores\n");
+    printf("  médios pela cor laranja e os valores maiores pela cor vermelha!\n");
     printf("\n");
-    printf("* Registre os dados da intensidade de chuva!\n");
-    printf("-> Entre com o nome do bairro e com os valores da intensidade de\n   chuva!\n");
+    printf("* Registre os dados da intensidade pluviométrica!\n");
+    printf("-> Entre com o nome do bairro e com os valores da intensidade\n");
+    printf("  pluviométrica!\n");
     printf("-> Limitado a 10 bairros e a 15 dias de dados por bairro!\n");   
     printf("####################################################################\n"); 
 }
@@ -495,7 +499,7 @@ void apresentacaoSistema() {
 void menuInicio() {
     printf("\n");
     printf("####################################################################\n");
-    printf("######## Sistema de Registro de Intensidade de Chuva  v1.0 #########\n");
+    printf("###### Sistema de Registro de Intensidade Pluviométrica v1.0 #######\n");
     printf("####################################################################\n");
 }
 
@@ -504,27 +508,27 @@ void menuPrincipal() {
     // Menu inicial    
     printf("\n");
     printf(">> Serviços disponíveis:\n");
-    printf("1 - Visualizar os registros da intensidade da chuva\n");
-    printf("2 - Registrar a intensidade da chuva\n");            
+    printf("1 - Visualizar os registros de intensidade pluviométrica\n");
+    printf("2 - Registrar uma intensidade pluviométrica\n");            
     printf("3 - Sair\n");    
 }
 
-void menuVisualizarIntensidadeChuva(struct Menu *menu, struct ConjuntoDados *conjuntoDados) {
+void menuVisualizarIntensidadePluviometrica(struct Menu *menu, struct ConjuntoDados *conjuntoDados) {
     switch(menu->menu) {
         case 11:
-            // Menu 11 - Menu Visualizar os registros da intensidade da chuva com dados aleatórios       
-            printf("========== Visualizar os registros da intensidade da chuva =========\n\n");
+            // Menu 11 - Menu Visualizar os registros da intensidade pluviométrica com dados aleatórios       
+            printf("======= Visualizar os registros da intensidade pluviométrica =======\n\n");
             printf(">> Gráfico \"Heatmap\" para os dados aleatórios:\n\n");
           
-            // Inicializar dados aleatórios de intensidade de chuva na matriz
+            // Inicializar dados aleatórios de intensidade pluviométrica na matriz
             inicializaMatriz(
-                conjuntoDados->medidaChuvaDiaBairroAleatorio, 
+                conjuntoDados->medidaPluviometricaDiaBairroAleatorio, 
                 &conjuntoDados->limitesAleatorio);
 
-            // Imprimir os valores aleatrios da matriz da intensidade da chuva no estilo Heatmap
+            // Imprimir os valores aleatrios da matriz da intensidade pluviométrica no estilo Heatmap
             imprimirHeatmap(
                 conjuntoDados->bairrosPadrao, 
-                conjuntoDados->medidaChuvaDiaBairroAleatorio, 
+                conjuntoDados->medidaPluviometricaDiaBairroAleatorio, 
                 &conjuntoDados->limitesAleatorio, 
                 &conjuntoDados->coresHeatmap
             );
@@ -533,14 +537,14 @@ void menuVisualizarIntensidadeChuva(struct Menu *menu, struct ConjuntoDados *con
             break;
 
         case 12:
-            // Menu 12 - Menu Visualizar os registros da intensidade da chuva com dados inseridos pelo usuário       
-            printf("========== Visualizar os registros da intensidade da chuva =========\n\n");
+            // Menu 12 - Menu Visualizar os registros da intensidade pluviométrica com dados inseridos pelo usuário       
+            printf("======= Visualizar os registros da intensidade pluviométrica =======\n\n");
             printf(">> Gráfico \"Heatmap\" para os dados inseridos pelo usuário:\n\n");
 
-            // Imprimir os valores inseridos pelo usuário da matriz de intensidade de chuva no estilo Heatmap
+            // Imprimir os valores inseridos pelo usuário na matriz de intensidade pluviométrica no estilo Heatmap
             imprimirHeatmap(
                 conjuntoDados->bairros, 
-                conjuntoDados->medidaChuvaDiaBairro, 
+                conjuntoDados->medidaPluviometricaDiaBairro, 
                 &conjuntoDados->limites, 
                 &conjuntoDados->coresHeatmap
             );
@@ -550,8 +554,8 @@ void menuVisualizarIntensidadeChuva(struct Menu *menu, struct ConjuntoDados *con
 
         case 1:
         default:
-            // Menu 1 - Menu Visualizar os registros da intensidade da chuva       
-            printf("========== Visualizar os registros da intensidade da chuva =========\n\n");
+            // Menu 1 - Menu Visualizar os registros da intensidade pluviométrica       
+            printf("======= Visualizar os registros da intensidade pluviométrica =======\n\n");
             printf(">> Selecione um conjunto de registros para visualizar:\n");
             printf("1 - Registros aleatórios\n");
             printf("2 - Registros inseridos pelo usuário\n");            
@@ -561,37 +565,37 @@ void menuVisualizarIntensidadeChuva(struct Menu *menu, struct ConjuntoDados *con
 
 }
 
-void menuRegistrarIntensidadeChuva(struct Menu *menu, struct ConjuntoDados *conjuntoDados) {
+void menuRegistrarIntensidadePluviometrica(struct Menu *menu, struct ConjuntoDados *conjuntoDados) {
 
     if(menu->menu >= 201 && menu->menu <= 210) {
 
         // Menu 201 a 210 - Menu 
-        printf("================== Registrar a intensidade da chuva ================\n\n");
+        printf("=============== Registrar a intensidade pluviométrica ==============\n\n");
         // Imprime o bairro selecinado
         printf(">> Bairro selecionado: %s\n", conjuntoDados->bairros[menu->bairro-1]);  
 
     }else if(menu->menu >= 20101 && menu->menu <= 21016) {
 
         // Menu 20101 a 21015 - Menu 
-        printf("================== Registrar a intensidade da chuva ================\n\n");
+        printf("=============== Registrar a intensidade pluviométrica ==============\n\n");
         // Imprime o bairro selecinado
         printf(">> Bairro selecionado: %s\n", conjuntoDados->bairros[menu->bairro-1]); 
-        printf(">> Registros de intensidade da chuva:\n") ;
-        // Imprime os dados de intensidade da chuva
+        printf(">> Registros de intensidade pluviométrica:\n") ;
+        // Imprime os dados de intensidade pluviométrica
         printf("  %-5s", "Dia");
         for(int i = 0; i < MAX_DIAS; i++)
             printf("| %3d |", i + 1);
         printf("\n");
         printf("  %-5s", "mm/h");
         for(int i = 0; i < MAX_DIAS; i++)
-            printf("|%5d|", conjuntoDados->medidaChuvaDiaBairro[i][menu->bairro-1]);
+            printf("|%5d|", conjuntoDados->medidaPluviometricaDiaBairro[i][menu->bairro-1]);
         printf("\n\n");
         // Verifica se  indiceDia é menor que o numero total de dias
         if (menu->indiceDia <= MAX_DIAS) {
-            printf(">> Dia: %d de %d.\n>> Intensidade da chuva: %d [mm/h]\n",
+            printf(">> Dia: %d de %d.\n>> Intensidade pluviométrica: %d [mm/h]\n",
                 menu->indiceDia,
                 MAX_DIAS,
-                conjuntoDados->medidaChuvaDiaBairro[menu->indiceDia - 1][menu->bairro-1]
+                conjuntoDados->medidaPluviometricaDiaBairro[menu->indiceDia - 1][menu->bairro-1]
             );
         } else {
             printf(">> Selecione uma opção:\n");
@@ -600,8 +604,8 @@ void menuRegistrarIntensidadeChuva(struct Menu *menu, struct ConjuntoDados *conj
 
     } else {
 
-        // Menu 2 - Menu Registrar a intensidade da chuva       
-        printf("================== Registrar a intensidade da chuva ================\n\n");
+        // Menu 2 - Menu Registrar a intensidade pluviométrica       
+        printf("=============== Registrar a intensidade pluviométrica ==============\n\n");
         printf(">> Selecione um bairro para inserir os dados:\n");            
         for (int indiceBairro = 0; indiceBairro < MAX_BAIRROS; indiceBairro++) {
             printf("%2d - %s\n", indiceBairro + 1, conjuntoDados->bairros[indiceBairro]);
@@ -619,7 +623,7 @@ void mensagemEncerramento() {
     // Mensagem de encerramento
     printf("\n");
     printf("####################################################################\n");
-    printf("######## Sistema de Registro da Intensidade de Chuva  v1.0 #########\n");
+    printf("###### Sistema de Registro da Intensidade Pluviometrica  v1.0 ######\n");
     printf("####################################################################\n");
     printf("Obrigado por utilizar nosso sistema!\n\n");  
     printf("Volte sempre!\n");  
@@ -651,7 +655,7 @@ void defineCoresHeatmap(struct CoresHeatmap *coresHeatmap) {
 }
 
 // Inicializa a matriz com valores aleatório de intensidade de chuva 
-void inicializaMatriz(int medidaChuvaDiaBairro[15][10], struct Limites *limites) {
+void inicializaMatriz(int medidaPluviometricaDiaBairro[15][10], struct Limites *limites) {
     // Inicia matriz com valores randomicos
     srand(time(NULL));
 
@@ -669,24 +673,24 @@ void inicializaMatriz(int medidaChuvaDiaBairro[15][10], struct Limites *limites)
         for (int i = 0; i < MAX_DIAS; i++){
             // Generate a random number between 1 and 100
             random_in_range = (rand() % 100) + 1;
-            medidaChuvaDiaBairro[i][j] = random_in_range;
+            medidaPluviometricaDiaBairro[i][j] = random_in_range;
             if (random_in_range > limites->valorMax)
                 limites->valorMax = random_in_range;   
             if (random_in_range < limites->valorMin)
                 limites->valorMin = random_in_range;                                            
-            //printf("%3d%s ", medidaChuvaDiaBairro[i][j], (i == MAX_DIAS - 1) ? "" : ",");
+            //printf("%3d%s ", medidaPluviometricaDiaBairro[i][j], (i == MAX_DIAS - 1) ? "" : ",");
         }
         //printf("}%s\n", (j == MAX_BAIRROS - 1) ? "" : ",");    
     }
     //printf("}\n");
 }
 
-void defineLimites(int medidaChuvaDiaBairro[15][10], struct Limites *limites) {
+void defineLimites(int medidaPluviometricaDiaBairro[15][10], struct Limites *limites) {
     // Inicia matriz com valores randomicos
     srand(time(NULL));
 
     // Define a variável que receberá os valores aleatórios dentro do laço de repetição
-    int medidaIntensidadeChuva;
+    int medidaIntensidadePluviometrica;
 
     // Define o valor máximo com um valor mínimo
     limites->valorMax = 0;
@@ -697,19 +701,19 @@ void defineLimites(int medidaChuvaDiaBairro[15][10], struct Limites *limites) {
     for (int j = 0; j < MAX_BAIRROS; j++) {    
         //printf("{ ");
         for (int i = 0; i < MAX_DIAS; i++){
-            medidaIntensidadeChuva = medidaChuvaDiaBairro[i][j];
-            if (medidaIntensidadeChuva > limites->valorMax)
-                limites->valorMax = medidaIntensidadeChuva;   
-            if (medidaIntensidadeChuva < limites->valorMin)
-                limites->valorMin = medidaIntensidadeChuva;                                            
-            //printf("%3d%s ", medidaChuvaDiaBairro[i][j], (i == MAX_DIAS - 1) ? "" : ",");
+            medidaIntensidadePluviometrica = medidaPluviometricaDiaBairro[i][j];
+            if (medidaIntensidadePluviometrica > limites->valorMax)
+                limites->valorMax = medidaIntensidadePluviometrica;   
+            if (medidaIntensidadePluviometrica < limites->valorMin)
+                limites->valorMin = medidaIntensidadePluviometrica;                                            
+            //printf("%3d%s ", medidaPluviometricaDiaBairro[i][j], (i == MAX_DIAS - 1) ? "" : ",");
         }
         //printf("}%s\n", (j == MAX_BAIRROS - 1) ? "" : ",");    
     }
     //printf("}\n");
 }
 
-void imprimirHeatmap(char bairros[10][20], int medidaChuvaDiaBairro[15][10], struct Limites *limites, struct CoresHeatmap *coresHeatmap) {
+void imprimirHeatmap(char bairros[10][20], int medidaPluviometricaDiaBairro[15][10], struct Limites *limites, struct CoresHeatmap *coresHeatmap) {
     
     // Cor final do Heatmap
     int rgbItem[3];
@@ -723,7 +727,7 @@ void imprimirHeatmap(char bairros[10][20], int medidaChuvaDiaBairro[15][10], str
     float norm_val_upper;    
 
     // Determina os limites dos valores de intensidade de chuva
-    defineLimites(medidaChuvaDiaBairro, limites);
+    defineLimites(medidaPluviometricaDiaBairro, limites);
 
     // Imprime os valores do gráfico Heatmap
     // Laço que percorre os bairros
@@ -740,7 +744,7 @@ void imprimirHeatmap(char bairros[10][20], int medidaChuvaDiaBairro[15][10], str
             // Verifica a diferença entre o limite maximo e  limite mínimo
             if (limites->valorMax - limites->valorMin) {
                 // Fórmula básica para normalizar os dados entre o menor e  maior
-                norm_val = (float) (medidaChuvaDiaBairro[j][i] - limites->valorMin) / (limites->valorMax - limites->valorMin);
+                norm_val = (float) (medidaPluviometricaDiaBairro[j][i] - limites->valorMin) / (limites->valorMax - limites->valorMin);
                 
                 // Garante que os valores normalizados estejam entre 0.0 e 1.0
                 if (norm_val < 0)
@@ -768,7 +772,7 @@ void imprimirHeatmap(char bairros[10][20], int medidaChuvaDiaBairro[15][10], str
 
                 // Imprime os valores de intensidade de chuva que correspondem às cores da metade inferior  
                 printf("\e[0m\e[38;2;%d;%d;%dm\e[48;2;%d;%d;%dm %5d \e[0m",
-                    rgbTexto[0], rgbTexto[1], rgbTexto[2], rgbItem[0], rgbItem[1], rgbItem[2], medidaChuvaDiaBairro[j][i]);  
+                    rgbTexto[0], rgbTexto[1], rgbTexto[2], rgbItem[0], rgbItem[1], rgbItem[2], medidaPluviometricaDiaBairro[j][i]);  
                 // Imprime os valores normalizados que correspondem às cores da metade inferior      
                 //  printf("\e[0m\e[38;2;%d;%d;%dm\e[48;2;%d;%d;%dm %5.2f \e[0m",
                 //     rgbTexto[0], rgbTexto[1], rgbTexto[2], rgbItem[0], rgbItem[1], rgbItem[2], norm_val_lower);                   
@@ -781,7 +785,7 @@ void imprimirHeatmap(char bairros[10][20], int medidaChuvaDiaBairro[15][10], str
                 rgbItem[2] = (int) coresHeatmap->rgbMedio[2] + (coresHeatmap->rgbAlto[2] - coresHeatmap->rgbMedio[2]) * norm_val_upper;
                 // Imprime os valores de intensidade de chuva que correspondem às cores da metade superior    
                 printf("\e[0m\e[38;2;%d;%d;%dm\e[48;2;%d;%d;%dm %5d \e[0m",
-                    rgbTexto[0], rgbTexto[1], rgbTexto[2], rgbItem[0], rgbItem[1], rgbItem[2], medidaChuvaDiaBairro[j][i]);         
+                    rgbTexto[0], rgbTexto[1], rgbTexto[2], rgbItem[0], rgbItem[1], rgbItem[2], medidaPluviometricaDiaBairro[j][i]);         
                 // Imprime os valores normalizados que correspondem às cores da metade superior 
                 // printf("\e[0m\e[38;2;%d;%d;%dm\e[48;2;%d;%d;%dm %5.2f \e[0m",
                 //     rgbTexto[0], rgbTexto[1], rgbTexto[2], rgbItem[0], rgbItem[1], rgbItem[2], norm_val_upper);        
