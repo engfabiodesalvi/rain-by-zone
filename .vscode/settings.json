@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "locale.h": "c",
+        "float.h": "c",
+        "corecrt.h": "c"
+    }
+}
