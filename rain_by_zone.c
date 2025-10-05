@@ -650,7 +650,7 @@ void mensagemEncerramento() {
     // Mensagem de encerramento
     printf("\n");
     printf("####################################################################\n");
-    printf("###### Sistema de Registro da Intensidade Pluviometrica  v1.0 ######\n");
+    printf("###### Sistema de Registro de Intensidade Pluviometrica  v1.0 ######\n");
     printf("####################################################################\n");
     printf("Obrigado por utilizar nosso sistema!\n\n");  
     printf("Volte sempre!\n");  
